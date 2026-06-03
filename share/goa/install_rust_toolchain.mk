@@ -29,7 +29,8 @@ VERBOSE ?= @
 
 # newer versions fail with unresolved symbol 'pthread_getthreadid_np'
 VERSION ?= nightly-2025-08-07
-ARCH    ?= x86_64
+# *build host* architecture
+ARCH    ?= $(shell uname -m)
 
 TOOLCHAIN := $(VERSION)-$(ARCH)-unknown-linux-gnu
 
