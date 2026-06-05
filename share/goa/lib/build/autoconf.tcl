@@ -4,7 +4,7 @@ proc create_or_update_build_dir { } {
 	mirror_source_dir_to_build_dir
 
 	global cppflags cflags cxxflags api_dirs spec_args
-	global config::build_dir config::cross_dev_prefix project_name
+	global config::arch config::build_dir config::cross_dev_prefix project_name
 	global project_dir
 
 	# invoke configure script only once
@@ -36,9 +36,12 @@ proc create_or_update_build_dir { } {
 
 	set     cmd [goa::sandboxed_build_command]
 
+	set host x86_64-pc-elf
+	if {$arch == "arm_v8a"} { set host aarch64-elf }
+
 	lappend cmd "./configure"
 	lappend cmd "--prefix" "/"
-	lappend cmd "--host" x86_64-pc-elf
+	lappend cmd "--host" $host
 	lappend cmd "CPPFLAGS=$cppflags"
 	lappend cmd "CFLAGS=$cflags"
 	lappend cmd "CXXFLAGS=$cxxflags"
