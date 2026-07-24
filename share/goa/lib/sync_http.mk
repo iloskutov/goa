@@ -99,14 +99,19 @@ $(TMP_DIR):
 
 # upload target file and update .local.etag if the former is newer
 $(abspath $(TMP_DIR)/%.local.etag): $(SRC_DIR)/% | $(TMP_DIR)
-	$(VERBOSE)curl -s -T $< $(SERVER) && $(ECHO) "$(DARK_COL)uploaded$(DEFAULT_COL) $* (local change)"
-	$(VERBOSE)curl -s -o /dev/null --etag-save $@ $(SERVER)/$*
+	$(VERBOSE)curl -s -T $< $(SERVER)
+	$(VERBOSE)$(ECHO) "$(DARK_COL)uploaded$(DEFAULT_COL) $* (local change)"
+	$(VERBOSE)curl -s -f -I $(SERVER)/$* --etag-save $@ -o /dev/null 
 
-# first upload local changes (prerequisites) then perform conditional upload
+# first upload local changes (prerequisites) then conditionally perform upload
 upload_%: $(abspath $(TMP_DIR)/%.local.etag)
-	$(VERBOSE)(curl -s --fail -T $(abspath $(SRC_DIR)/$*) --etag-compare $< $(SERVER) \
-		&& curl -s -o /dev/null --etag-save $< $(SERVER)/$* \
-		&& $(ECHO) "$(DARK_COL)uploaded$(DEFAULT_COL) $* (remote change)") || true
+	$(VERBOSE) \
+	RESPONSE=$$(curl -s -I --etag-compare $< $(SERVER)/$* -w '%{http_code}' -o /dev/null || true ) ; \
+	if [[ $$RESPONSE != "304" ]] ; then \
+		curl -s -f -T $(abspath $(SRC_DIR)/$*) $(SERVER) -o /dev/null ; \
+		$(ECHO) "$(DARK_COL)uploaded$(DEFAULT_COL) $* (remote change)"; \
+		curl -s -f -I $(SERVER)/$* --etag-save $< -o /dev/null ; \
+	fi \
 
 # delete from server
 delete_%:
