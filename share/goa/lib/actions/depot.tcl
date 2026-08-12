@@ -705,9 +705,11 @@ namespace eval goa {
 	
 				file copy $license_file [file join $dst_dir LICENSE]
 	
+				exec rm -rf [file join $dst_dir src .git]
 				exec find $dst_dir ( -name "*~" \
 				                     -or -name "*.rej" \
 				                     -or -name "*.orig" \
+				                     -or -name "*.gitignore" \
 				                     -or -name "*.swp" ) -delete
 	
 				# generate 'used_apis' file with specific versions
