@@ -49,6 +49,9 @@ proc _create_cmake_modules { } {
 			set fd [open $cmake_file w]
 			puts $fd "set(${package_name}_FOUND True)"
 			puts $fd "set(CMAKE_USE_PTHREADS_INIT True)"
+			puts $fd "if(NOT TARGET Threads::Threads)"
+			puts $fd "  add_library(Threads::Threads INTERFACE IMPORTED)"
+			puts $fd "endif()"
 			close $fd
 			continue
 		}
