@@ -26,6 +26,8 @@ trace add variable verbose write const_var
 # Print version and exit
 #
 if {[consume_optional_cmdline_switch "--version"]} {
+	# always disable sandboxing for this command
+	lappend gaol --disable-sandbox
 	puts [current_goa_branch]
 	exit 0
 }
