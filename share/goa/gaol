@@ -43,6 +43,10 @@ namespace eval gaol {
 
 	proc --system-usr { args } {
 		variable state
+
+		if {[dict get $state no_bwrap]} {
+			gaol::parse_next args }
+		
 		dict lappend state symlinks usr/lib64 /lib64
 		dict lappend state symlinks usr/bin   /bin
 		dict lappend state symlinks usr/sbin  /sbin
