@@ -11,7 +11,9 @@ namespace eval ::config {
 	# defaults, potentially being overwritten by 'goarc' files
 	# Note: All variables in this namespace can be overwritten by 'goarc' files
 	variable arch                     ""
-	variable cross_dev_prefix         ""
+	variable cross_dev_prefix         [expr {[info exists ::env(CROSS_DEV_PREFIX)] ?
+	                                         $::env(CROSS_DEV_PREFIX)
+	                                         : ""}]
 	variable rebuild                  0
 	variable jobs                     1
 	variable warn_strict              ""
