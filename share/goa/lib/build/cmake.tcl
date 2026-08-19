@@ -25,7 +25,7 @@ proc _create_cmake_modules { } {
 	set used_cmake_modules ""
 	foreach cmake_list $cmake_list_files {
 		try {
-			append used_cmake_modules [exec grep find_package\( $cmake_list | sed -e {s/\s*find_package(\(\w*\).*).*/\1/}]
+			append used_cmake_modules "[exec grep -E {^\s*find_package\(\w+} $cmake_list | sed -e {s/\s*find_package(\(\w*\).*/\1/}] "
 		} trap CHILDSTATUS { } {
 		} on error { msg } { error $msg $::errorInfo }
 	}
