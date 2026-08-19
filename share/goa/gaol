@@ -63,7 +63,7 @@ namespace eval gaol {
 		}
 
 		# check for unmerged /usr system
-		if {[file type /bin] != "link" || [file link /bin] != "usr/bin"} {
+		if {[file type /bin] != "link" || ![regexp "/?usr/bin" [file link /bin]]} {
 			puts [join [list "\n!!! Bumpy road ahead !!!\n" \
 				"You seem to run a system with an unmerged /usr. This likely" \
 				"affects the sandboxing mechanism. Please be aware that" \
