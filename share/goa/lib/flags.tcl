@@ -54,9 +54,10 @@ if {[info exists ::warn_strict] && $warn_strict} {
 if {[info exists with_backtrace] && $with_backtrace} {
 	lappend cflags -fno-omit-frame-pointer }
 
-# we strip binaries later on, thus we can always build with -g
-lappend cflags -g
-lappend cflags -fdebug-prefix-map=$depot_dir=/depot
+if {$config::debug} {
+	lappend cflags -g
+	lappend cflags -fdebug-prefix-map=$depot_dir=/depot
+}
 
 # on export of dbg archives, replace build dir with depot dir
 global perform
