@@ -142,7 +142,7 @@ proc create_or_update_build_dir { } {
 
 proc build { } {
 	global verbose tool_dir
-	global config::build_dir config::jobs project_name
+	global config::build_dir config::debug config::jobs project_name
 
 	set     cmd [goa::sandboxed_build_command]
 	lappend cmd make -C $build_dir "-j$jobs"
@@ -156,12 +156,18 @@ proc build { } {
 	if {[catch {exec -ignorestderr {*}$cmd | sed "s/^/\[$project_name:cmake\] /" >@ stdout} msg]} {
 		exit_with_error "build via cmake failed:\n" $msg }
 
-	# return if 'install' target does not exist
-	if {[exec_status [list {*}$cmd -q install]] == 2} {
+	if { $debug == 1 } {
+		set install_target "install"
+	} else {
+		set install_target "install/strip"
+	}
+
+	# return if $install_target target does not exist
+	if {[exec_status [list {*}$cmd -q $install_target]] == 2} {
 		return }
 
-	# at this point, we know that the 'install' target exists
-	lappend cmd install
+	# at this point, we know that the $install_target exists
+	lappend cmd $install_target
 	if {[catch {exec -ignorestderr {*}$cmd | sed "s/^/\[$project_name:cmake\] /" >@ stdout} msg]} {
 		exit_with_error "install via cmake failed:\n" $msg }
 }
