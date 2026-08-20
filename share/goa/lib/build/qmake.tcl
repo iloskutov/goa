@@ -60,14 +60,12 @@ proc create_or_update_build_dir { } {
 	global cppflags cxxflags
 	global config::build_dir project_dir config::abi_dir
 	global config::cross_dev_prefix project_name
-	global config::toolchain_version
 
 	set qmake_platform [_qmake_platform]
 	set qt_version     [_qt_version]
+	set qt_tool_dir [file dirname [file dirname $cross_dev_prefix]]
 	if { $qt_version == "qt6" } {
-		set qt_tool_dir "/usr/local/genode/tool/$toolchain_version/qt6"
-	} else {
-		set qt_tool_dir "/usr/local/genode/tool/$toolchain_version"
+		append qt_tool_dir "/qt6"
 	}
 
 	if {![file exists $build_dir]} {
