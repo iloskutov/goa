@@ -4,3 +4,4 @@ base64.o:
 	zig build
 	# extract base64.o from static library.
 	ar x zig-out/lib/libziglib.a
+	mv .zig-cache/o/*/base64.o .
