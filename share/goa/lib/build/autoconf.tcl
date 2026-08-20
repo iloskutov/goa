@@ -1,36 +1,7 @@
-
-proc create_or_update_build_dir { } {
-
-	mirror_source_dir_to_build_dir
-
+proc _configure_cmd { } {
 	global cppflags cflags cxxflags api_dirs spec_args
-	global config::arch config::build_dir config::cross_dev_prefix project_name
+	global config::arch config::build_dir config::cross_dev_prefix
 	global project_dir
-
-	# invoke configure script only once
-	if {[file exists [file join $build_dir config.status]]} {
-		return }
-
-	set orig_pwd [pwd]
-
-	#
-	# If the configure script doesn't exist yet, it has to be
-	# generated first via the configure.ac file using autoreconf.
-	#
-	if {[expr ![file exists [file join src configure]]]} {
-
-		set     cmd [goa::sandboxed_build_command]
-		lappend cmd "autoreconf"
-		lappend cmd "--install"
-
-		diag "create build system via autoreconf"
-
-		cd $build_dir
-		if {[catch {exec -ignorestderr {*}$cmd | sed "s/^/\[$project_name:autoconf\] /" >@ stdout} msg]} {
-			exit_with_error "build-system creation via autoconf failed:\n" $msg
-		}
-		cd $orig_pwd
-	}
 
 	create_spec_file "" ""
 
@@ -68,7 +39,62 @@ proc create_or_update_build_dir { } {
 	foreach arg [read_file_content_as_list [file join $project_dir configure_args]] {
 		lappend cmd $arg }
 
+	return $cmd
+}
+
+
+proc create_or_update_build_dir { } {
+	global config::build_dir project_name project_dir spec_file
+
+	# compare configure command and link spec, and clear directory if anything changed
+	set signature_file [file join $build_dir ".goa_configure_command"]
+
+	set previous_cmd       [string trim [read_file_content $signature_file]]
+	set previous_link_spec [string trim [read_file_content $spec_file]]
+
+	set cmd       [join [_configure_cmd] { }]
+	set link_spec [string trim [read_file_content $spec_file]]
+
+	if {"$previous_cmd" != "$cmd" || "$previous_link_spec" != "$link_spec"} {
+		file delete -force $build_dir
+	}
+
+	mirror_source_dir_to_build_dir
+
+	# write build command to file
+	set fd [open $signature_file w]
+	puts $fd $cmd
+	close $fd
+
+	# invoke configure script only once
+	if {[file exists [file join $build_dir config.status]]} {
+		return }
+
+	set orig_pwd [pwd]
+
+	#
+	# If the configure script doesn't exist yet, it has to be
+	# generated first via the configure.ac file using autoreconf.
+	#
+	if {[expr ![file exists [file join src configure]]]} {
+
+		set     cmd [goa::sandboxed_build_command]
+		lappend cmd "autoreconf"
+		lappend cmd "--install"
+
+		diag "create build system via autoreconf"
+
+		cd $build_dir
+		if {[catch {exec -ignorestderr {*}$cmd | sed "s/^/\[$project_name:autoconf\] /" >@ stdout} msg]} {
+			exit_with_error "build-system creation via autoconf failed:\n" $msg
+		}
+		cd $orig_pwd
+	}
+
+
 	diag "create build directory via autoconf"
+
+	set cmd [_configure_cmd]
 
 	cd $build_dir
 
