@@ -135,10 +135,12 @@ namespace eval ::config {
 			set normalized_path [unsafe_file normalize $target_path/___]
 			set normalized_path [unsafe_file dirname $normalized_path]
 			if {![_is_sub_directory $normalized_path $paths]} {
+				set allowed [expr {[lindex $args 0] eq "executable" ?
+				                   "allowed_tools" : "allowed_paths"}]
 				exit_with_error "Command 'file $args' operates on an invalid path." \
 				                "Valid paths are:\n" \
 				                "\n [join $paths "\n "]" \
-				                "\n\n You may consider setting 'allowed_paths' in" \
+				                "\n\n You may consider setting '$allowed' in" \
 				                "your \$HOME/goarc or /goarc file."
 			}
 		}
