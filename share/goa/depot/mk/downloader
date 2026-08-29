@@ -58,7 +58,7 @@ $(DEPOT_DIR)/% : $(PUBLIC_DIR)/%.tar.xz $(PUBLIC_DIR)/%.tar.xz.sig
 	                          "      public key '$$pubkey_file'"; \
 	                 false )
 	$(VERBOSE)mkdir -p $(dir $@)
-	$(VERBOSE)tar xfJ $(PUBLIC_DIR)/$*.tar.xz -C $(dir $@)
+	$(VERBOSE)tar xfJ $(PUBLIC_DIR)/$*.tar.xz -C $(dir $@) --no-same-owner --no-same-permissions
 
 DOWNLOADED_FILES := $(addprefix $(PUBLIC_DIR)/,$(ARCHIVES_TAR_XZ:=.tar.xz)) \
                     $(addprefix $(PUBLIC_DIR)/,$(ARCHIVES_TAR_XZ:=.tar.xz.sig)) \
