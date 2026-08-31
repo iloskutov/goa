@@ -67,7 +67,7 @@ namespace eval goa {
 		global argv0 config::jobs config::depot_user config::depot_dir
 		global config::versions_from_genode_dir config::public_dir config::debug
 		global config::common_var_dir config::var_dir verbose
-		global config::search_dir config::update_index
+		global config::search_dir config::update_index genodelabs
 
 		set dir [file fullnormalize $dir]
 
@@ -79,9 +79,10 @@ namespace eval goa {
 		lappend cmd -C $dir
 		lappend cmd --jobs $jobs
 		lappend cmd --arch $arch
-		lappend cmd --depot-user     $depot_user
-		lappend cmd --depot-dir      $depot_dir
-		lappend cmd --public-dir     $public_dir
+		lappend cmd --depot-user      $depot_user
+		lappend cmd --depot-dir       $depot_dir
+		lappend cmd --public-dir      $public_dir
+		lappend cmd --genodelabs-user $genodelabs
 		if {$common_var_dir != ""} {
 			lappend cmd --common-var-dir $common_var_dir
 		}
