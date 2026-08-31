@@ -925,11 +925,15 @@ proc current_goa_branch { } {
 proc avail_goa_branches { } {
 	if {![have_installed git]} { return "unknown" }
 
-	set git_branch_output [goa_git branch --list -r |\
-	                         sed "s/^..//" | grep "^origin" |\
-	                         grep -v " -> " | sed "s#^origin/##"]
+	set output [goa_git ls-remote -q --refs . refs/remotes/origin/*\[^HEAD\]]
 
-	return [split $git_branch_output "\n"]
+	set branches {}
+	foreach line [split $output "\n"] {
+		if {[regexp {\trefs/remotes/origin/(.+)$} $line _ branch]} {
+			lappend branches $branch
+		}
+	}
+	return $branches
 }
 
 
