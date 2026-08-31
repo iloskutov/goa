@@ -291,6 +291,8 @@ namespace eval goa {
 			archive_parts $archive user type name vers
 			try {
 				set dir [find_project_dir_for_archive $type $name]
+				if {$type == "bin"} {
+					set type "src" }
 
 				if {"[exported_project_archive_version $dir $user/$type/$name]" != "$vers"} {
 					log "skipping export of $dir due to version mismatch"
@@ -864,6 +866,8 @@ namespace eval goa {
 			# try to find corresponding project and export
 			try {
 				set dir [find_project_dir_for_archive $type $name]
+				if {$type == "bin"} {
+					set type "src" }
 				
 				# check that the expected version matches the exported version
 				set archive "$user/$type/$name"
@@ -969,6 +973,8 @@ namespace eval goa {
 
 				try {
 					set dir [find_project_dir_for_archive $type $name]
+					if {$type == "bin"} {
+						set type "src" }
 
 					if {$user != $depot_user} {
 						log "skipping export of $dir: must be exported as depot user '$user'"
