@@ -38,6 +38,8 @@ XZ_THREADS ?= 1
 
 include $(DEPOT_TOOL_DIR)/mk/front_end.inc
 
+$(call check_tool,xz)
+$(call check_tool,tar)
 
 #
 # Determine dependencies, check for completeness

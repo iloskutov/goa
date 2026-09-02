@@ -26,6 +26,9 @@ include $(DEPOT_TOOL_DIR)/mk/front_end.inc
 
 TARGETS := $(addprefix $(DEPOT_DIR)/,$(MAKECMDGOALS))
 
+$(call check_tool,xz)
+$(call check_tool,tar)
+$(call check_tool,curl)
 
 #
 # Unpack after checking signature against public key as stored in the depot
