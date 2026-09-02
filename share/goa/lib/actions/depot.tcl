@@ -315,9 +315,9 @@ namespace eval goa {
 		try {
 			download_archives $uninstalled_archives
 
-		} trap DOWNLOAD_FAILED { } {
+		} trap DOWNLOAD_FAILED { msg } {
 			exit_with_error "failed to download the following depot archives:\n" \
-			                [join $uninstalled_archives "\n "]
+			                [join $uninstalled_archives "\n"] "\n\n$msg"
 
 		} on error { msg } { error $msg $::errorInfo }
 	}
@@ -1124,9 +1124,9 @@ namespace eval goa {
 		try {
 			download_archives $missing_archives "force_download"
 
-		} trap DOWNLOAD_FAILED { } {
+		} trap DOWNLOAD_FAILED { msg } {
 			exit_with_error "failed to download the following depot archives:\n" \
-			                [join $missing_archives "\n "]
+			                [join $missing_archives "\n "] "\n\n$msg"
 
 		} on error { msg } { error $msg $::errorInfo }
 	}
@@ -1146,9 +1146,9 @@ namespace eval goa {
 	
 			try {
 				exec_depot_tool publish {*}$args >@ stdout
-			} trap CHILDSTATUS { } {
+			} trap CHILDSTATUS { msg } {
 				exit_with_error "failed to publish the following depot archives:\n" \
-				                [join $archives "\n "]
+				                [join $archives "\n "] "\n\n$msg"
 			} on error { msg } { error $msg $::errorInfo }
 		}
 	}
@@ -1161,8 +1161,8 @@ namespace eval goa {
 			try {
 				download_archives $archive
 
-			} trap DOWNLOAD_FAILED { } {
-					exit_with_error "failed to download $archive"
+			} trap DOWNLOAD_FAILED { $msg } {
+					exit_with_error "failed to download $archive\n\n$msg"
 
 			} on error { msg } { error $msg $::errorInfo }
 		}
