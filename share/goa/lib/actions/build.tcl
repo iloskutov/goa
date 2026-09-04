@@ -28,6 +28,26 @@ namespace eval goa {
 	#
 	proc detect_build_system { } {
 
+		# sort args files to make sure configure_args comes before make_args
+		# to uphold invariant of build/autoconf
+		foreach args_file [lsort -unique [glob -nocomplain [file join *_args]]] {
+			if {[file exists $args_file]} {
+				if {$args_file == "cmake_args"} {
+					return cmake }
+
+				if {$args_file == "configure_args"} {
+					return autoconf }
+
+				if {$args_file == "make_args"} {
+					return make }
+
+				if {$args_file == "meson_args"} {
+					return meson }
+
+				exit_with_error "unknown $args_file file encountered"
+			}
+		}
+
 		# XXX autoconf (configure.ac)
 		# XXX autoconf (configure.ac configure), e.g., bash
 		# XXX custom configure (no configure.ac configure), e.g., Vim

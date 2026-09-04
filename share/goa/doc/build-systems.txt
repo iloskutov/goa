@@ -6,7 +6,9 @@
 
 Goa automatically detects the kind of build system used based on the content of
 the _src/_ directory. E.g. if the directory contains a plain Makefile, Goa
-assumes the use of GNU Make. Other options are listed below.
+assumes the use of GNU Make. Other options are listed below. In case the
+Goa project contans an _args_ file, e.g. _configure_args_, the automatic
+detection is disarmed.
 
 ALTERNATIVE BUILD SYSTEMS
 #########################
