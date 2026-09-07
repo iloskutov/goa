@@ -24,7 +24,7 @@ _ZN9Component9constructERN6Genode3EnvE:
 	mov     rbx, rax
 	mov     rdi, rax
 	call    _ZN6Genode3Log8_acquireENS0_4TypeE
-	mov     rdi, QWORD [rbx+0x20]
+	mov     rdi, QWORD [rbx+0x28]
 	lea     rsi, [rel hello_str]
 	call    _ZN6Genode5printERNS_6OutputEPKc
 	mov     rdi, rbx
