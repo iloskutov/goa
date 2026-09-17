@@ -49,7 +49,7 @@ if {[lindex $argv 0] == "help"} {
 	}
 	set     cmd [file join $tool_dir gosh gosh]
 	lappend cmd --style man $file | man -l -
-	system {*}$cmd
+	exec {*}$cmd >@ stdout 2>@ stderr
 	exit
 }
 

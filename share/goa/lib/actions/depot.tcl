@@ -374,7 +374,7 @@ namespace eval goa {
 
 		set     cmd [file join $tool_dir gosh gosh]
 		lappend cmd --style man --style info --version $vers --archive $archive [lindex $candidates 0]| man -l -
-		system {*}$cmd
+		exec {*}$cmd >@ stdout 2>@ stderr
 	}
 
 
