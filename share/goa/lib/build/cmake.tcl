@@ -1,6 +1,7 @@
-proc _create_cmake_modules { } {
+proc _create_cmake_modules { pkgconfig_dir } {
 	global config::var_dir config::abi_dir api_dirs project_dir
-	global cmake_module_dir 
+	global cmake_module_dir
+	global cppflags
 
 	set cmake_module_dir [file join $var_dir cmake Modules]
 	if {[file exists $cmake_module_dir]} {
@@ -29,6 +30,8 @@ proc _create_cmake_modules { } {
 		} trap CHILDSTATUS { } {
 		} on error { msg } { error $msg $::errorInfo }
 	}
+
+	set pkgconfig_dir_available [file exists $pkgconfig_dir]
 
 	#
 	# create missing Find*.cmake files if corresponding api is used
@@ -59,12 +62,39 @@ proc _create_cmake_modules { } {
 		set api_dir [lsearch -inline -nocase -regexp $api_dirs /.*$package_name/*]
 		if {$api_dir != ""} {
 			set archive_name [lindex [split $api_dir "/"] end-1]
+
 			diag "CMake module $package_name is provided by used $archive_name api"
 
 			set fd [open $cmake_file w]
 			puts $fd "set(${package_name}_FOUND True)"
-			puts $fd "set(${package_name}_LIBRARY [file join $abi_dir $archive_name.lib.so])"
-			puts $fd "set(${package_name}_INCLUDE_DIR [file join $api_dir include])"
+
+			#
+			# For the moment querying the pkg-config files is solely inteded for
+			# incorporating additional include paths - the provided '*_INCLUDE_DIRS'
+			# and '*_LIBRARIES' variables might not be evaluated by a project.
+			#
+			set provides_pc_files [glob -nocomplain $api_dir/*.pc]
+			if {$pkgconfig_dir_available && $provides_pc_files != ""} {
+				set pc_cflags [query_pkgconfig "$pkgconfig_dir" "$package_name" "--cflags"]
+				if {$pc_cflags != ""} {
+					# append as cppflags are used by C_FLAGS and CXX_FLAGS
+					set cppflags "$cppflags $pc_cflags"
+
+					set cmake_include_dirs { }
+					foreach flag $pc_cflags {
+						lappend cmake_include_dirs [regsub -all -- {-I} $flag {}] }
+					set cmake_include_dirs [join $cmake_include_dirs ";"]
+					puts $fd "set(${package_name}_INCLUDE_DIRS \"$cmake_include_dirs\")" }
+
+				set pc_libs [query_pkgconfig "$pkgconfig_dir" "$package_name" "--libs"]
+				if {$pc_libs != ""} {
+					set cmake_libraries { }
+					foreach lib $pc_libs {
+						lappend cmake_libraries [regsub -all -- {-l} $lib {}] }
+
+					set cmake_libraries [join $cmake_libraries ";"]
+					puts $fd "set(${package_name}_LIBRARIES \"$cmake_libraries\")" }
+			}
 			close $fd
 		} else {
 			log "CMake module $package_name is not provided by any api archive" \
@@ -87,6 +117,8 @@ proc create_or_update_build_dir { } {
 	global config::build_dir project_dir config::abi_dir
 	global config::cross_dev_prefix project_name
 
+	set pkgconfig_dir [create_pkgconfig_dir]
+
 	# check whether CMakeLists.txt modifies CMAKE_MODULE_PATH
 	set     check_modules_cmd grep
 	lappend check_modules_cmd set\(CMAKE_MODULE_PATH
@@ -96,10 +128,11 @@ proc create_or_update_build_dir { } {
 		                "\nsolely managed by Goa. Please patch the file accordingly."
 	}
 
-	set cmake_module_dir [_create_cmake_modules]
-
 	if {![file exists $build_dir]} {
 		file mkdir $build_dir }
+
+	# build directory must exist beforehand
+	set cmake_module_dir [_create_cmake_modules "$pkgconfig_dir"]
 
 	create_spec_file "" ""
 

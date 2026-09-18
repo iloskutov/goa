@@ -64,37 +64,6 @@ if {[goa using_api sdl]} {
 	lappend cmake_quirk_args "-DSDL_LIBRARY:STRING=':sdl.lib.so'"
 }
 
-# SDL2
-
-append_include_dir_for_api sdl2        include SDL2
-append_include_dir_for_api sdl2_mixer  include SDL2
-append_include_dir_for_api sdl2_image  include SDL2
-append_include_dir_for_api sdl2_ttf    include SDL2
-
-if {[using_api sdl2]} {
-
-	# CMake's detection of libSDL expects the library named uppercase
-	set symlink_name [file join $abi_dir SDL2.lib.so]
-	if {![file exists $symlink_name]} {
-		file link -symbolic $symlink_name "sdl2.lib.so" }
-}
-
-if {[using_api sdl2_mixer]} {
-
-	# CMake's detection of SDL2_mixer expects the library named uppercase
-	set symlink_name [file join $abi_dir SDL2_mixer.lib.so]
-	if {![file exists $symlink_name]} {
-		file link -symbolic $symlink_name "sdl2_mixer.lib.so" }
-}
-
-if {[using_api sdl2_net]} {
-
-	# CMake's detection of SDL2_net expects the library named uppercase
-	set symlink_name [file join $abi_dir SDL2_net.lib.so]
-	if {![file exists $symlink_name]} {
-		file link -symbolic $symlink_name "sdl2_net.lib.so" }
-}
-
 # Genode's posix library
 
 global ldlibs_exe

@@ -1,9 +1,27 @@
+proc _extend_cppflags_from_pkgconfig { pkgconfig_dir } {
+	global cppflags api_dirs
+
+	foreach api_dir $api_dirs {
+		set provides_pc_files [glob -nocomplain $api_dir/*.pc]
+		foreach pc_file $provides_pc_files {
+			# acquire package name from filename
+			set package_name [regsub ".pc" [file tail $pc_file] ""]
+			set pc_cflags [query_pkgconfig "$pkgconfig_dir" "$package_name" "--cflags"]
+			if {$pc_cflags != ""} {
+				set cppflags "$cppflags $pc_cflags" }
+		}
+	}
+}
+
 proc _make_cmd { } {
 	global verbose
 	global cppflags cflags cxxflags api_dirs
 	global spec_args
 	global config::build_dir config::cross_dev_prefix config::jobs project_dir
 	global config::depot_dir config::var_dir
+
+	set pkgconfig_dir [create_pkgconfig_dir]
+	_extend_cppflags_from_pkgconfig "$pkgconfig_dir"
 
 	create_spec_file "" ""
 
@@ -18,7 +36,7 @@ proc _make_cmd { } {
 	lappend cmd "CROSS_DEV_PREFIX=$cross_dev_prefix"
 	lappend cmd "-j$jobs"
 	lappend cmd "PKG_CONFIG_LIBDIR=''"
-	lappend cmd "PKG_CONFIG_PATH=[join ${api_dirs} ":"]"
+	lappend cmd "PKG_CONFIG_PATH='$pkgconfig_dir'"
 
 	# keep MAKE_SHARED_LINKER_FLAGS for backward compatibility (replace by specs)
 	lappend cmd "MAKE_SHARED_LINKER_FLAGS=-shared"

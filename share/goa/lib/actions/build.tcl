@@ -457,6 +457,7 @@ namespace eval goa {
 		prepare_ldso_support_stub [used_apis]
 
 		source [file join $tool_dir lib quirks.tcl]
+		source [file join $tool_dir lib pkgconfig.tcl]
 
 		# filter out non-existing include directories
 		set existing_include_dirs {}

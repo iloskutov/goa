@@ -5,6 +5,8 @@ proc _configure_cmd { } {
 
 	create_spec_file "" ""
 
+	set pkgconfig_dir [create_pkgconfig_dir]
+
 	set     cmd [goa::sandboxed_build_command]
 
 	set host x86_64-pc-elf
@@ -23,7 +25,7 @@ proc _configure_cmd { } {
 	lappend cmd "AR=${cross_dev_prefix}ar"
 	lappend cmd "AS=${cross_dev_prefix}as"
 	lappend cmd "PKG_CONFIG_LIBDIR=''"
-	lappend cmd "PKG_CONFIG_PATH=[join ${api_dirs} ":"]"
+	lappend cmd "PKG_CONFIG_PATH='$pkgconfig_dir'"
 
 	# keep LDLIBS_SHARED for backward compatibility (-shared is replaced by specs)
 	lappend cmd "LDLIBS_SHARED=-shared"
