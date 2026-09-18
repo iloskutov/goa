@@ -1,0 +1,95 @@
+
+                                 Pkg-config
+
+
+                               Josef Söntgen
+
+Goa makes use of 'pkg-config(1)' to enrich a projects build environment and
+provide compile and linking information.
+
+.pc files
+#########
+
+Projects usually provide ways to generate pkg-config configuration files
+and these include meta-data on how to compile and link, in short combine,
+the project with another project.
+
+These files follow a documented convention and contain several keyword fields.
+The most important ones in this context are 'Cflags' and 'Libs':
+
+:Cflags: Specifies the compile flags and normally contains include directives,
+  e.g. -I/path/to/include/foobar and other definitions like -DFOO_BAR_DEF.
+
+:Libs: Contains link flags, e.g., -L/path/to/lib/dir and -l:foobar.lib.so.
+
+Besides those there are other fields, like 'Name', 'Description', 'Version'
+and 'Requires' that are required to some degree but are only altered when
+strictly necessary.
+
+The 'Cflags' field is usually set to '-I${includedir}' and/or
+'-I${includedir}/foobar', while the 'Libs' field contains '-l:foobar.lib.so'
+named after the shared library.
+
+'${includedir}' is a pkg-config variable and normally set indirectly via
+'includedir=${prefix}/include' where '${prefix}' is set to e.g. '/usr/local'.
+
+
+Usage
+#####
+
+With Goa providing an absolute path beforehand is difficult because there
+are no constraints on where a Goa project is located or built. For that reason
+_.pc_ files used within Goa must contain the special marker 'DEPOT_API_DIR'.
+This marker will be replaced when assembling _.pc_ files from API archives.
+
+The following snippet illustrates a simple 'foobar.pc' file:
+
+! depot_api_dir=DEPOT_API_DIR
+! includedir=${depot_api_dir}/include
+!
+! Name: libfoobar
+! Description: Library for foo with a little bit of bar
+! Version: 0.4.2
+! Cflags: -I${includedir}/foobar
+! Libs: -l:libfoobar.lib.so
+
+Goa will process all _.pc_ files provided by API archives specified in
+_used_apis_ and store them in 'var/pkgconfig'. This directory will by
+set in 'PKG_CONFIG_PATH', an environment variable that the 'pkg-config(1)'
+tool evaluates to find _.pc_ files.
+
+While doing so, Goa will replace 'DEPOT_API_DIR' by the concrete API
+directory, e.g.:
+
+! depot_api_dir="/build/genode/depot/genodelabs/api/foobar/0.4.2-2026-10-05"
+! includedir=${depot_api_dir}/include
+! […]
+
+So, when a build system executes 'pkg-config --cflags foobar', 'pkg-config(1)'
+will look for '/…/var/pkgconfig/foobar.pc' and the result is
+
+! -I/build/genode/depot/genodelabs/api/foobar/0.4.2-2026-10-05/include/foobar
+
+
+Notes
+#####
+
+Depending on the build system the pkg-config integration differs, please look
+into the documentation of the build system in question for detailed information.
+
+:autoconf: naturally uses pkg-config to collect dependencies and to generate
+  the various compiling and linking flags from that.
+
+:cmake: on the other hand, relies on its 'Find*.cmake' modules and '.config'
+  files, whose information can be populated by querying pkg-config, cf.
+  FindPkgConfig.cmake. Currently, artificial modules are generated in 'var/cmake'
+  that record if a dependency is found and provides some meta-data regarding
+  the include paths and shared library files.
+
+:meson: behaves like autoconf.
+
+
+SEE ALSO
+########
+
+build-systems, config, import, overview, api

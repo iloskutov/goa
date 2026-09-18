@@ -61,6 +61,17 @@ file. Supported are both *executable* and *library* targets. For a detailed
 description on how to build Meson projects please refer to *goa help meson*.
 
 
+Pkg-config
+==========
+
+Although pkg-config itself is not a build system it is one of the backbones
+of commonly used build systems when it comes to building C and C++ projects.
+For this reason Goa sets the build system's environment up in a way that
+the information provided by pkg-config can enrich the build system's
+configuration stage. For a detailed description on how to make use of
+pkg-config please refer to *goa help pkg-config*.
+
+
 qmake (Qt)
 ==========
 
