@@ -2,25 +2,66 @@
 # Meson specific implementation
 #
 
-proc api_status { } {
-	global config::build_dir
+proc _mangle_pkgconfig_files { } {
+	global config::build_dir project_name
 
-	set pkg_config_log [file join $build_dir "pkg-config.log"]
-	set module_status  [read_file_content_as_list $pkg_config_log]
-	set module_status  [lsort -unique $module_status]
+	set meson_pc_file_dir "[file join $build_dir meson-private]"
 
-	if {[llength $module_status] == 0} { return }
+	foreach pc_file [glob -nocomplain $meson_pc_file_dir/*.pc] {
 
-	log "pkg-config status:"
-	foreach module $module_status {
-		set status [split $module ":"]
-		set found [expr [lindex $status 1] == 1 ? "YES" : "NO" ]
-		log "\t[lindex $status 0] found: $found"
+		# first replace $prefix with placeholder to have a useful 'Cflags' field
+		set     cmd [sandboxed_build_command]
+		lappend cmd "sed -i 's;prefix=.*$;prefix=DEPOT_API_DIR;' $pc_file"
+		if {[catch {exec -ignorestderr {*}$cmd | sed "s/^/\[$project_name:meson\] /" >@ stdout} msg]} {
+			exit_with_error "mangeling pkgconfig file '[file tail $pc_file]' via meson failed:\n" $msg }
+
+		# second parse 'Libs:' field and replace every linker directive to generate
+		# a useful 'Libs:' field
+		set     cmd [sandboxed_build_command]
+		lappend cmd "grep '^Libs:' $pc_file"
+		set success 0
+		if {[catch {exec -ignorestderr {*}$cmd} msg] == 0} {
+			set success 1
+		}
+		# not all .pc files contain an Libs field
+		if {$success != 1} { return }
+
+		set libs_line [lindex [split $msg "\n"] end]
+		set mangeled_libs { }
+		foreach lib_flag $libs_line {
+			if {[string equal -length 2 "-l" $lib_flag] == 1} {
+				set lib [regsub -all -- {-l} $lib_flag {}]
+
+				# verbatim lib flags denoted already mangled ones,
+				# e.g. -l:pcsc-lite.lib.so, copy them directly
+				if {[string equal -length 1 ":" $lib] == 1} {
+					lappend mangeled_libs "-l$lib"
+				} else {
+					lappend mangeled_libs "-l:lib$lib.lib.so"
+				}
+			}
+		}
+
+		if {[llength $mangeled_libs] != 0} {
+			set libs_line "Libs: $mangeled_libs"
+
+			set     cmd [sandboxed_build_command]
+			lappend cmd "sed -i 's;Libs:.*$;$libs_line;' $pc_file"
+			if {[catch {exec -ignorestderr {*}$cmd | sed "s/^/\[$project_name:meson\] /" >@ stdout} msg]} {
+				exit_with_error "mangeling pkgconfig file '[file tail $pc_file]' via meson failed:\n" $msg }
+		}
+
+		# last remove any '*.private:' field as static libraries should not shine
+		# through and used_apis should hopefully cover all external dependencies
+		set     cmd [sandboxed_build_command]
+		lappend cmd "sed -i 's;^.*\\.private:.*$;;' $pc_file"
+		if {[catch {exec -ignorestderr {*}$cmd | sed "s/^/\[$project_name:meson\] /" >@ stdout} msg]} {
+			exit_with_error "mangeling pkgconfig file '[file tail $pc_file]' via meson failed:\n" $msg }
 	}
 }
 
 
-proc create_cross_file { dir } {
+proc create_cross_file { dir pkgconfig_dir } {
 	global tool_dir
 	global config::arch config::cross_dev_prefix
 
@@ -43,12 +84,12 @@ proc create_cross_file { dir } {
 	# Custom pkg-config command that checks if required libraries are present in
 	# abi_dir
 	#
-	puts $fh "pkg-config = '$tool_dir/lib/pkg-config.tcl'"
+	puts $fh "pkg-config = 'pkg-config'"
 
 	puts $fh ""
 	puts $fh "\[properties\]"
 	puts $fh "needs_exec_wrapper = false"
-	puts $fh "pkg_config_libdir  = '$dir'"
+	puts $fh "pkg_config_libdir  = '$pkgconfig_dir'"
 	puts $fh ""
 	puts $fh "\[host_machine\]"
 	puts $fh "system     = 'freebsd'"
@@ -91,6 +132,8 @@ proc create_or_update_build_dir { } {
 
 	if {![file exists $build_dir]} {
 		file mkdir $build_dir }
+
+	set pkgconfig_dir [create_pkgconfig_dir]
 
 	# create/empty pkg-config.log
 	set pkg_config_log [file join $build_dir "pkg-config.log"]
@@ -161,7 +204,7 @@ proc create_or_update_build_dir { } {
 		lappend cmd $arg }
 
 	lappend cmd "--cross-file"
-	lappend cmd [create_cross_file $build_dir]
+	lappend cmd [create_cross_file $build_dir $pkgconfig_dir]
 	lappend cmd "--reconfigure"
 	lappend cmd $build_dir
 	lappend cmd $source_dir
@@ -170,8 +213,6 @@ proc create_or_update_build_dir { } {
 
 	if {[catch {exec -ignorestderr {*}$cmd | sed "s/^/\[$project_name:meson\] /" >@ stdout} msg]} {
 		exit_with_error "build-directory creation via meson failed:\n" $msg }
-
-	api_status
 }
 
 
@@ -189,6 +230,8 @@ proc build { } {
 
 	if {[catch {exec -ignorestderr {*}$cmd | sed "s/^/\[$project_name:meson\] /" >@ stdout} msg]} {
 		exit_with_error "build via meson failed:\n" $msg }
+
+	_mangle_pkgconfig_files
 
 	# install
 	set     cmd [sandboxed_build_command]
