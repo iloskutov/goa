@@ -902,7 +902,7 @@ namespace eval goa {
 
 				# make binary archives available
 				if {$type == "src"} {
-					foreach $archive_arch $archs {
+					foreach archive_arch $archs {
 						set dst_dir "[file join $depot_dir [apply_arch $versioned_archive $archive_arch]]"
 						if {$dst_dir != "" && ![file exists $dst_dir]} {
 							_make_archive_available $versioned_archive $archive_arch }
