@@ -81,6 +81,7 @@ proc goa_project_dirs { tests } {
 	                             -and -not -path "*/contrib/*" \
 	                             -and -not -path "*/build/*" \
 	                             -and -not -path "*/var/*" \
+	                             -and -not -path "*/.*/*" \
 	                             -and \( -name import \
 	                                     -or -name src \
 	                                     -or -name pkg \
