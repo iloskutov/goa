@@ -59,7 +59,7 @@ proc _create_cmake_modules { pkgconfig_dir } {
 			continue
 		}
 
-		set api_dir [lsearch -inline -nocase -regexp $api_dirs /.*$package_name/*]
+		set api_dir [lsearch -inline -nocase -regexp $api_dirs /.*$package_name/\[^/\]+$]
 		if {$api_dir != ""} {
 			set archive_name [lindex [split $api_dir "/"] end-1]
 
