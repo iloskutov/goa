@@ -10,6 +10,14 @@ int main(int, char **)
 
 	/* try writing to immutable file */
 	int fd = open("/tmp/static", O_RDWR);
+	if (fd < 0)
+		printf("Unable to open file '/tmp/static' for writing, this is expected.\n");
+	else {
+		printf("Unexpectedly opened read-only file /tmp/static for writing\n");
+		return -1;
+	}
+
+	fd = open("/tmp/static", O_RDONLY);
 	if (fd < 0) {
 		printf("Error: Unable to open file '/tmp/static'.\n");
 		return -1;

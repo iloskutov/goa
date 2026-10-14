@@ -18,8 +18,8 @@ runtime | ram: 10M | caps: 1000 | binary: init
         + dir dev
         | + log
         + dir tmp
-        | + ram
         | + rom static | label: file_content | binary: no
+        | + ram
         + import
           + dir tmp
             + rom x | label: file_content | binary: no

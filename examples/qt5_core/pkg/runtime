@@ -13,9 +13,9 @@ runtime | ram: 64M | caps: 500 | binary: test-qt_core
   + libc | stdout: /dev/log | stderr: /dev/log | pipe: /pipe | rtc: /dev/rtc
   + arg | value: test-qt_core
 + content
-  + rom egl.lib.so
+  + rom egl-minimal.lib.so
   + rom expat.lib.so
-  + rom glapi.lib.so
+  + rom glapi-minimal.lib.so
   + rom libc.lib.so
   + rom libm.lib.so
   + rom libQt5Core.lib.so
@@ -29,7 +29,7 @@ runtime | ram: 64M | caps: 500 | binary: test-qt_core
   + rom libQt5Xml.lib.so
   + rom libqgenode.lib.so
   + rom libdrm.lib.so
-  + rom mesa.lib.so
+  + rom mesa-minimal.lib.so
   + rom qt5_component.lib.so
   + rom stdcxx.lib.so
   + rom vfs.lib.so

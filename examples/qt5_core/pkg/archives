@@ -5,7 +5,7 @@ genodelabs/src/vfs_pipe
 genodelabs/src/zlib
 genodelabs/src/expat
 genodelabs/src/libdrm
-genodelabs/src/mesa
+genodelabs/src/mesa-minimal
 genodelabs/src/qt5_base
 genodelabs/src/qt5_component
 genodelabs/src/qt5_svg

@@ -3,9 +3,9 @@ genodelabs/src/libc
 genodelabs/src/vfs
 genodelabs/src/stdcxx
 genodelabs/src/zlib
-genodelabs/src/mesa
+genodelabs/src/mesa-minimal
 genodelabs/src/expat
 genodelabs/src/libdrm
 genodelabs/src/vfs_gpu
 genodelabs/src/libiconv
-jschlatow/src/sdl2/2026-04-20
+jschlatow/src/sdl2/2.32.0-2026-10-26

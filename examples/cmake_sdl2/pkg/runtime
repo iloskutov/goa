@@ -15,10 +15,10 @@ runtime | ram: 10M | caps: 1000 | binary: sdl2_example
   + rom vfs.lib.so
   + rom zlib.lib.so
   + rom sdl2_example
-  + rom sdl2.lib.so
-  + rom egl.lib.so
-  + rom glapi.lib.so
-  + rom mesa.lib.so
+  + rom libSDL2.lib.so
+  + rom egl-minimal.lib.so
+  + rom glapi-minimal.lib.so
+  + rom mesa-minimal.lib.so
   + rom libdrm.lib.so
   + rom expat.lib.so
   + rom vfs_gpu.lib.so
