@@ -6,10 +6,10 @@ runtime | ram: 64M | caps: 500 | binary: test-qt_core
 + config
   + vfs
   | + dir dev
-  |   + log
-  |   + gpu
-  |   + inline rtc
-  |     : 2018-01-01 00:01
+  |   + device | + log
+  |   + device | + gpu
+  |   + inline rtc | : 2018-01-01 00:01
+  | + dir pipe | + pipe
   + libc | stdout: /dev/log | stderr: /dev/log | pipe: /pipe | rtc: /dev/rtc
   + arg | value: test-qt_core
 + content

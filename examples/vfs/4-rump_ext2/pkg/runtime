@@ -46,7 +46,7 @@ runtime | ram: 40M | caps: 1000 | binary: init
   |   + libc | stdout: /dev/log
   |   + vfs
   |     + dir dev
-  |     | + log
+  |     | + device | + log
   |     + fs
   + start fs_query | caps: 120 | ram: 2M
     + config

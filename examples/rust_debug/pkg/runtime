@@ -3,7 +3,7 @@ runtime | ram: 10M | caps: 1000 | binary: rust-debug
   + libc | stdout: /dev/log | stderr: /dev/log
   + vfs
   | + dir dev
-  |   + log
+  |   + device | + log
   + arg | value: rust-debug
 + content
   + rom rust-debug

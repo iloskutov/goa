@@ -25,15 +25,15 @@ runtime | ram: 16M | caps: 1000 | binary: init
   |   | | : Hi, this is a terminal test!
   |   | | :
   |   | + dir dev
-  |   |   + terminal
+  |   |   + device | + terminal
   |   + libc | stdin: /source.txt | stdout: /dev/terminal
   + start consumer | ram: 4M
     + binary stdin2out
     + config
       + vfs
       | + dir dev
-      |   + log
-      |   + terminal
+      |   + device | + log
+      |   + device | + terminal
       + libc | stdin: /dev/terminal | stdout: /dev/log
 + content
   + rom vfs.lib.so

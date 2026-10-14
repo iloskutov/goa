@@ -6,7 +6,7 @@ runtime | ram: 10M | caps: 1000 | binary: sdl2_example
   + libc | stdout: /dev/log | stderr: /dev/log
   + vfs
     + dir dev
-      + log
+      + device | + log
 + content
   + rom posix.lib.so
   + rom libc.lib.so

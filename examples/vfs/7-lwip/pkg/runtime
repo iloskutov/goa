@@ -32,7 +32,7 @@ runtime | ram: 16M | caps: 1000 | binary: init
   |   |   |        ip_addr: 10.0.2.2
   |   |   |        netmask: 255.255.255.0
   |   |   |        gateway: 10.0.2.1
-  |   |   + log
+  |   |   + device | + log
   |   + libc | stdout: /dev/log | socket: /dev/socket
   |   + arg | value: sendto
   |   + arg | value: 10.0.2.3
@@ -47,7 +47,7 @@ runtime | ram: 16M | caps: 1000 | binary: init
       |   |        ip_addr: 10.0.2.3
       |   |        netmask: 255.255.255.0
       |   |        gateway: 10.0.2.1
-      |   + log
+      |   + device | + log
       + libc | stdout: /dev/log | socket: /dev/socket
       + arg | value: recvfrom
       + arg | value: 10.0.2.2

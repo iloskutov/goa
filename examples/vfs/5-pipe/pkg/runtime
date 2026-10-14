@@ -37,7 +37,7 @@ runtime | ram: 16M | caps: 1000 | binary: init
     + config
       + vfs
       | + dir dev
-      | | + log
+      | | + device | + log
       | + dir pipe
       |   + fs
       + libc | stdin: /pipe/named-pipe | stdout: /dev/log

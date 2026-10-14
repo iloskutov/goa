@@ -3,7 +3,7 @@ runtime | ram: 10M | caps: 1000 | binary: hello-rust
   + libc | stdout: /dev/log | stderr: /dev/log
   + vfs
   | + dir dev
-  |   + log
+  |   + device | + log
   + arg | value: hello-rust
 + content
   + rom hello-rust
