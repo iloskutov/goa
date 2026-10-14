@@ -85,6 +85,8 @@ proc build { } {
 	if {$arch != "x86_64"} {
 		exit_with_error "Cargo/rust support is limited to x86_64." }
 
+	set target x86_64-unknown-genode
+
 	create_spec_file "" ""
 
 	set rustflags { }
@@ -103,11 +105,18 @@ proc build { } {
 
 	prepare_toolchain
 
+	set pkgconfig_dir [create_pkgconfig_dir]
+
 	set     cmd [sandboxed_build_command]
 	lappend cmd --setenv RUSTFLAGS $rustflags
+	lappend cmd --setenv RUST_LIBC_UNSTABLE_FREEBSD_VERSION 12
 	lappend cmd --setenv RUST_STD_FREEBSD_12_ABI 1
 	lappend cmd --setenv RUSTUP_HOME $rustup_home
 	lappend cmd --setenv CARGO_HOME  $cargo_home
+	lappend cmd --setenv BINDGEN_EXTRA_CLANG_ARGS_$target $cflags
+	lappend cmd --setenv CFLAGS_$target $cflags
+	lappend cmd --setenv PKG_CONFIG_LIBDIR_$target $pkgconfig_dir
+	lappend cmd --setenv PKG_CONFIG_SYSROOT_DIR_$target ''
 	if {[info exists cargo_path]} {
 		lappend cmd --ro-bind  $cargo_path
 		lappend cmd --env-path $cargo_path
@@ -118,8 +127,8 @@ proc build { } {
 	lappend cmd cargo build
 	if {!$debug} {
 		lappend cmd "-r" }
-	lappend cmd "--target" $tool_dir/cargo/x86_64-unknown-genode.json
-	lappend cmd --config target.x86_64-unknown-genode.linker='\"$cross_dev_prefix\gcc\"'
+	lappend cmd "--target" $tool_dir/cargo/$target.json
+	lappend cmd --config target.$target.linker='\"$cross_dev_prefix\gcc\"'
 	lappend cmd --config profile.release.panic='\"abort\"'
 	lappend cmd --config profile.dev.panic='\"abort\"'
 	# let cargo know we need to build panic_abort too, see
@@ -143,14 +152,14 @@ proc build { } {
 
 	if {$debug} {
 		diag "copy debug binaries"
-		set binaries [exec find target/x86_64-unknown-genode/debug -maxdepth 1 -type f -executable]
+		set binaries [exec find target/$target/debug -maxdepth 1 -type f -executable]
 		lappend copy $binaries .
 
 		if {[catch {exec -ignorestderr {*}$copy | sed "s/^/\[$project_name:copy\] /" >@ stdout} msg]} {
 			exit_with_error "moving debug binary failed: $msg" }
 	} else {
 		diag "copy release binaries"
-		set binaries [exec find target/x86_64-unknown-genode/release -maxdepth 1 -type f -executable]
+		set binaries [exec find target/$target/release -maxdepth 1 -type f -executable]
 		lappend copy $binaries .
 
 		if {[catch {exec -ignorestderr {*}$copy | sed "s/^/\[$project_name:copy\] /" >@ stdout} msg]} {
