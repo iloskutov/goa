@@ -9,7 +9,7 @@ namespace eval goa {
 	namespace export export-dbg export-bin import-dependencies export-dependencies
 	namespace export published-archives download-foreign publish archive-info
 	namespace export update-index
-	namespace export compare-src compare-raw compare-pkg compare-api
+	namespace export compare-src compare-raw compare-pkg compare-api compare-all
 
 	set ::use_sq [sq_available]
 
@@ -1158,13 +1158,7 @@ namespace eval goa {
 		global config::depot_dir config::public_dir args
 
 		if {![file exists [file join $depot_dir $archive]]} {
-			try {
-				download_archives $archive
-
-			} trap DOWNLOAD_FAILED { msg } {
-					exit_with_error "failed to download $archive\n\n$msg"
-
-			} on error { msg } { error $msg $::errorInfo }
+			download_archives $archive
 		}
 
 		if {$args(force_download)} {
@@ -1188,6 +1182,7 @@ namespace eval goa {
 		if {[file exists $raw_dir] && [file isdirectory $raw_dir]} {
 			set other_archive [versioned_project_archive raw]
 			download_if_missing $other_archive
+
 			set other_dir [file safe-join $depot_dir $other_archive]
 
 			set status [exec_status [list diff -qNr raw $other_dir > /dev/null]]
@@ -1293,5 +1288,26 @@ namespace eval goa {
 		}
 
 		return true
+	}
+
+	proc compare-all { &exported_archives accept_missing } {
+		upvar ${&exported_archives} exported_archives
+
+		set types [list raw api src pkg]
+
+		set result true
+		foreach type $types {
+			try {
+				if {![goa compare-$type exported_archives]} {
+					set result false
+				}
+			} trap DOWNLOAD_FAILED { } {
+				if { !$accept_missing } {
+					set result false
+				}
+			}
+		}
+
+		return $result
 	}
 }

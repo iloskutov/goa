@@ -124,12 +124,8 @@ namespace eval goa {
 		if {[file exists $version_file]} {
 			if {$if_needed} {
 				set dummy {}
-				set status [expr [goa compare-src dummy] && \
-				                 [goa compare-raw dummy] && \
-				                 [goa compare-api dummy] && \
-				                 [goa compare-pkg dummy]]
 
-				if {$status} {
+				if {[goa compare-all dummy true]} {
 					log "Skipping version bump"
 					return
 				} else {
@@ -162,7 +158,10 @@ namespace eval goa {
 				set skip_bump false
 				if {$if_needed} {
 					set dummy {}
-					set skip_bump [goa compare-$type dummy]
+					set skip_bump true
+					try {
+						set skip_bump [goa compare-$type dummy]
+					} trap DOWNLOAD_FAILED { } { }
 				}
 
 				set archive "$depot_user/$type/$project_name"

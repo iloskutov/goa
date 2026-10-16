@@ -142,10 +142,7 @@ if {$perform(exported)} {
 
 	set exported_archives {}
 
-	set status [expr [goa compare-src exported_archives] && \
-	                 [goa compare-raw exported_archives] && \
-	                 [goa compare-api exported_archives] && \
-	                 [goa compare-pkg exported_archives]]
+	set status [goa compare-all exported_archives false]
 	if {!$status} {
 		log "Version update recommended"
 		exit 1
