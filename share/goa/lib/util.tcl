@@ -295,8 +295,8 @@ proc looks_like_goa_project_dir { dir } {
 		if {[file exists $dir/$name] && ![file isdirectory $dir/$name]} {
 			return 0 } }
 
-	# no project if there is no runtime file in 'pkg/'
-	if {[file exists $dir/pkg] && ![file isfile $dir/pkg/runtime]} {
+	# no project if there is neither a runtime nor an archives file in 'pkg/'
+	if {[file exists $dir/pkg] && ![file isfile $dir/pkg/runtime] && ![file isfile $dir/pkg/archives]} {
 		return 0 }
 
 	# no project if raw/ is empty or has only *~ files or *.orig files
