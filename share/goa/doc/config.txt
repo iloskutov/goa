@@ -119,7 +119,7 @@ Goa evaluates the following configuration variables.
   directory.
 
 :install_dir: The directory where additional build tools are downloaded and
-  installed.
+  installed. The default is _var/install/_ within the project directory.
 
 :common_var_dir:
   If defined, Goa places all generated files in the specified directory
