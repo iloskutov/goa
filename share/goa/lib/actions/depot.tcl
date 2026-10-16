@@ -1161,7 +1161,7 @@ namespace eval goa {
 			try {
 				download_archives $archive
 
-			} trap DOWNLOAD_FAILED { $msg } {
+			} trap DOWNLOAD_FAILED { msg } {
 					exit_with_error "failed to download $archive\n\n$msg"
 
 			} on error { msg } { error $msg $::errorInfo }
