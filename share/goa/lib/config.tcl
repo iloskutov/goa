@@ -191,6 +191,7 @@ namespace eval ::config {
 			exists      -
 			type        -
 			pathtype    -
+			rootname    -
 			join        { }
 			default {
 				exit_with_error "Unknown command 'file $args'" }

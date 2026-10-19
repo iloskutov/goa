@@ -31,17 +31,16 @@ proc _create_cmake_modules { pkgconfig_dir } {
 		} on error { msg } { error $msg $::errorInfo }
 	}
 
-	set pkgconfig_dir_available [file exists $pkgconfig_dir]
-
 	#
 	# create missing Find*.cmake files if corresponding api is used
 	#
 	# Note: We compare the lower-case package name used by cmake with the
-	#       archive names mentioned in used_apis. More precisely, the archive
-	#       name must end with the lower-case package name. If api archives
+	#       names of the *.pc files. More precisely, the file name
+	#       must end with the lower-case package name. If api archives
 	#       provide differently named or multiple packages, they must come with
 	#       corresponding Find*.cmake files.
 	# 
+	set pc_files [glob -type f -tails -directory $pkgconfig_dir -nocomplain *.pc]
 	foreach package_name $used_cmake_modules {
 		set cmake_file [file join $cmake_module_dir Find${package_name}.cmake]
 		if {[file exists $cmake_file]} {
@@ -59,41 +58,41 @@ proc _create_cmake_modules { pkgconfig_dir } {
 			continue
 		}
 
-		set api_dir [lsearch -inline -nocase -regexp $api_dirs /.*$package_name/\[^/\]+$]
-		if {$api_dir != ""} {
-			set archive_name [lindex [split $api_dir "/"] end-1]
-
-			diag "CMake module $package_name is provided by used $archive_name api"
+		set pc_file [lsearch -inline -nocase $pc_files *$package_name.pc]
+		if {$pc_file != ""} {
+			diag "CMake module $package_name is generated from $pc_file"
 
 			set fd [open $cmake_file w]
 			puts $fd "set(${package_name}_FOUND True)"
 
 			#
-			# For the moment querying the pkg-config files is solely inteded for
+			# For the moment querying the pkg-config files is solely intended for
 			# incorporating additional include paths - the provided '*_INCLUDE_DIRS'
 			# and '*_LIBRARIES' variables might not be evaluated by a project.
 			#
-			set provides_pc_files [glob -nocomplain $api_dir/*.pc]
-			if {$pkgconfig_dir_available && $provides_pc_files != ""} {
-				set pc_cflags [query_pkgconfig "$pkgconfig_dir" "$package_name" "--cflags"]
-				if {$pc_cflags != ""} {
-					# append as cppflags are used by C_FLAGS and CXX_FLAGS
-					set cppflags "$cppflags $pc_cflags"
+			set pc_name [file rootname $pc_file]
+			set pc_cflags [query_pkgconfig "$pkgconfig_dir" "$pc_name" "--cflags"]
+			if {$pc_cflags != ""} {
+				# append as cppflags are used by C_FLAGS and CXX_FLAGS
+				set cppflags "$cppflags $pc_cflags"
 
-					set cmake_include_dirs { }
-					foreach flag $pc_cflags {
-						lappend cmake_include_dirs [regsub -all -- {-I} $flag {}] }
-					set cmake_include_dirs [join $cmake_include_dirs ";"]
-					puts $fd "set(${package_name}_INCLUDE_DIRS \"$cmake_include_dirs\")" }
+				set cmake_include_dirs { }
+				foreach flag $pc_cflags {
+					lappend cmake_include_dirs [regsub -all -- {-I} $flag {}] }
 
-				set pc_libs [query_pkgconfig "$pkgconfig_dir" "$package_name" "--libs"]
-				if {$pc_libs != ""} {
-					set cmake_libraries { }
-					foreach lib $pc_libs {
-						lappend cmake_libraries [regsub -all -- {-l} $lib {}] }
+				puts $fd "set(${package_name}_INCLUDE_DIR \"[lindex $cmake_include_dirs 0]\")"
+				set cmake_include_dirs [join $cmake_include_dirs ";"]
+				puts $fd "set(${package_name}_INCLUDE_DIRS \"$cmake_include_dirs\")"
+			}
 
-					set cmake_libraries [join $cmake_libraries ";"]
-					puts $fd "set(${package_name}_LIBRARIES \"$cmake_libraries\")" }
+			set pc_libs [query_pkgconfig "$pkgconfig_dir" "$pc_name" "--libs"]
+			if {$pc_libs != ""} {
+				set cmake_libraries { }
+				foreach lib $pc_libs {
+					lappend cmake_libraries [regsub -all -- {-l} $lib {}] }
+
+				set cmake_libraries [join $cmake_libraries ";"]
+				puts $fd "set(${package_name}_LIBRARIES \"$cmake_libraries\")"
 			}
 			close $fd
 		} else {
