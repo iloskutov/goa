@@ -118,10 +118,16 @@ namespace eval goa {
 		set missing {}
 
 		try {
-			exec_depot_tool dependencies $archive 2> /dev/null
+			exec_depot_tool dependencies $archive 2>@1
 
 		} trap CHILDSTATUS { msg } {
-			foreach line [split $msg \n] {
+			# missing dependendencies is an error of the depot tool, we
+			# thus need to distinguish this expected error from other errors
+			set lines [split $msg \n]
+			if {[lsearch -exact $lines "Error: incomplete or missing archives:"] == -1} {
+				exit_with_error $msg }
+
+			foreach line $lines {
 				set archive [string trim $line]
 				try {
 					archive_parts $archive user type name vers
@@ -1096,7 +1102,7 @@ namespace eval goa {
 			diag "acquiring dependencies via archives: $archives"
 
 			try {
-				set output [exec_depot_tool dependencies {*}$archives 2> /dev/null]
+				set output [exec_depot_tool dependencies {*}$archives 2>@1]
 				foreach line [split $output \n] {
 					set archive [string trim $line]
 					try {
