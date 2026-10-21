@@ -1,5 +1,5 @@
-proc _create_cmake_modules { pkgconfig_dir } {
-	global config::var_dir config::abi_dir api_dirs project_dir
+proc _create_cmake_modules { } {
+	global config::var_dir config::abi_dir api_dirs project_dir pkgconfig_dir
 	global cmake_module_dir
 	global cppflags
 
@@ -114,9 +114,7 @@ proc create_or_update_build_dir { } {
 	global cppflags cflags cxxflags spec_args
 	global env cmake_quirk_args
 	global config::build_dir project_dir config::abi_dir
-	global config::cross_dev_prefix project_name
-
-	set pkgconfig_dir [create_pkgconfig_dir]
+	global config::cross_dev_prefix project_name pkgconfig_dir
 
 	# check whether CMakeLists.txt modifies CMAKE_MODULE_PATH
 	set     check_modules_cmd grep
@@ -131,7 +129,7 @@ proc create_or_update_build_dir { } {
 		file mkdir $build_dir }
 
 	# build directory must exist beforehand
-	set cmake_module_dir [_create_cmake_modules "$pkgconfig_dir"]
+	set cmake_module_dir [_create_cmake_modules]
 
 	create_spec_file "" ""
 

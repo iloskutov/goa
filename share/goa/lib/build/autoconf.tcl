@@ -2,10 +2,9 @@ proc _configure_cmd { } {
 	global cppflags cflags cxxflags api_dirs spec_args
 	global config::arch config::build_dir config::cross_dev_prefix
 	global project_dir
+	global pkgconfig_dir
 
 	create_spec_file "" ""
-
-	set pkgconfig_dir [create_pkgconfig_dir]
 
 	set     cmd [goa::sandboxed_build_command]
 

@@ -129,11 +129,10 @@ proc create_or_update_build_dir { } {
 	global spec_args
 	global config::build_dir project_dir config::abi_dir project_name
 	global config::cross_dev_prefix config::cc_cxx_opt_std config::debug
+	global pkgconfig_dir
 
 	if {![file exists $build_dir]} {
 		file mkdir $build_dir }
-
-	set pkgconfig_dir [create_pkgconfig_dir]
 
 	# create/empty pkg-config.log
 	set pkg_config_log [file join $build_dir "pkg-config.log"]

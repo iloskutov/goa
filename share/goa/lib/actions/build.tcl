@@ -429,7 +429,7 @@ namespace eval goa {
 		global config::cc_cxx_opt_std config::ld_march config::abi_dir
 		global config::build_dir api_dirs
 		global config::with_backtrace config::warn_strict config::depot_user
-		global project_name project_dir
+		global project_name project_dir pkgconfig_dir
 
 		#
 		# Prepare depot content for the used APIs and generate ABI stubs
@@ -479,6 +479,9 @@ namespace eval goa {
 
 		foreach api [used_apis] {
 			lappend api_dirs [file join $depot_dir $api] }
+
+		# depends on populated api_dirs
+		set pkgconfig_dir [create_pkgconfig_dir]
 
 		create_or_update_build_dir
 	}
@@ -837,5 +840,20 @@ namespace eval goa {
 			puts "Please review the symbols files(s) and add them to your repository."
 		} else {
 			exit_with_error "No libraries listed in the artifacts." }
+	}
+
+	proc extend_cppflags_from_pkgconfig { } {
+		global cppflags api_dirs pkgconfig_dir
+
+		foreach api_dir $api_dirs {
+			set provides_pc_files [glob -nocomplain $api_dir/*.pc]
+			foreach pc_file $provides_pc_files {
+				# acquire package name from filename
+				set package_name [regsub ".pc" [file tail $pc_file] ""]
+				set pc_cflags [query_pkgconfig "$pkgconfig_dir" "$package_name" "--cflags"]
+				if {$pc_cflags != ""} {
+					set cppflags "$cppflags $pc_cflags" }
+			}
+		}
 	}
 }
