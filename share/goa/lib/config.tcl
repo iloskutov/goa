@@ -176,6 +176,7 @@ namespace eval ::config {
 				return $path
 			}
 			safe-join {
+				set args [lrange $args 1 end]
 				return [file normalize [file join {*}$args]]
 			}
 
