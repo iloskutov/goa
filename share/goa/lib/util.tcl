@@ -995,3 +995,35 @@ proc user_confirmation { msg default_yes } {
 
 	return $choice
 }
+
+##
+# Execute $body for every archive type produced by the project in $dir
+proc for_each_archive_type { dir &type body } {
+	
+	upvar ${&type} type
+	
+	set api_file [file join $dir api]
+	if {[file isfile $api_file]} {
+		set type "api"
+		uplevel 1 $body
+	}
+
+	set src_dir [file join $dir src]
+	set import_file [file join $dir import]
+	if {[file isdirectory $src_dir] || [file isfile $import_file]} {
+		set type "src"
+		uplevel 1 $body
+	}
+
+	set raw_dir [file join $dir raw]
+	if {[file exists $raw_dir] && [file isdirectory $raw_dir]} {
+		set type "raw"
+		uplevel 1 $body
+	}
+
+	set pkg_dir [file join $dir pkg]
+	if {[file exists $pkg_dir] && [file isdirectory $pkg_dir]} {
+		set type "pkg"
+		uplevel 1 $body
+	}
+}

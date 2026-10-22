@@ -71,37 +71,6 @@ namespace eval goa {
 	}
 
 
-	proc _for_each_archive_type { &type body } {
-		global project_dir
-
-		upvar ${&type} type
-		
-		set api_file [file join $project_dir api]
-		if {[file exists $api_file] && [file isfile $api_file]} {
-			set type "api"
-			uplevel 1 $body
-		}
-
-		set src_dir [file join $project_dir src]
-		if {[file exists $src_dir] && [file isdirectory $src_dir]} {
-			set type "src"
-			uplevel 1 $body
-		}
-
-		set raw_dir [file join $project_dir raw]
-		if {[file exists $raw_dir] && [file isdirectory $raw_dir]} {
-			set type "raw"
-			uplevel 1 $body
-		}
-
-		set pkg_dir [file join $project_dir pkg]
-		if {[file exists $pkg_dir] && [file isdirectory $pkg_dir]} {
-			set type "pkg"
-			uplevel 1 $body
-		}
-	}
-	
-
 	proc bump-version { if_needed target_version } {
 
 		global project_dir project_name
@@ -112,7 +81,7 @@ namespace eval goa {
 		# check whether any version is managed via goarc
 		set any_version_set false
 		if {![file exists $version_file]} {
-			_for_each_archive_type type {
+			for_each_archive_type $project_dir type {
 				if {[info exists version($depot_user/$type/$project_name)]} {
 					set any_version_set true }
 				if {[info exists version(_/$type/$project_name)]} {
@@ -154,7 +123,7 @@ namespace eval goa {
 
 		# print new versions if versions are managed via goarc
 		if {$any_version_set} {
-			_for_each_archive_type type {
+			for_each_archive_type $project_dir type {
 				set skip_bump false
 				if {$if_needed} {
 					set dummy {}
