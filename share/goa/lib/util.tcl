@@ -103,6 +103,24 @@ proc consume_required_cmdline_arg { tag } {
 
 
 ##
+# Determine value of positional command line argument and remove arg from argv
+#
+# \return argument value
+#
+proc consume_positional_cmdline_arg { default } {
+	global argv
+
+	if {[llength $argv] >= 1} {
+		set arg [lindex $argv 0]
+		set argv [lrange $argv 1 end]
+		return $arg
+	}
+
+	return $default
+}
+
+
+##
 # Determine value of optional command-line argument and remove arg from argv
 #
 # \return argument value

@@ -249,21 +249,14 @@ if {[file exists import] && [file isfile import]} {
 #
 
 if {$perform(update-goa)} {
-	set args(switch_to_goa_branch) ""
-	if {[llength $argv] == 1} {
-		set args(switch_to_goa_branch) [lindex $argv 0]
-		set argv [lrange $argv 1 end]
-	}
+	set args(switch_to_goa_branch) [consume_positional_cmdline_arg ""]
 }
 
 if {$perform(info)} {
 	if {[consume_optional_cmdline_switch "--update-index"]} { set config::update_index 1 }
 
-	set args(archive) ""
-	if {[llength $argv] > 0} {
-		set args(archive) [lindex $argv 0]
-		set argv [lrange $argv 1 end]
-	} else {
+	set args(archive) [consume_positional_cmdline_arg ""]
+	if {$args(archive) == ""} {
 		exit_with_error "missing archive argument\n" \
 			            "\nExpected command:\n" \
 			            "\ngoa info <archive>\n"
@@ -285,11 +278,8 @@ if {$perform(bump-version)} {
 	set args(if_needed)    [consume_optional_cmdline_switch "--if-needed"]
 	set config::depot_user [consume_optional_cmdline_arg    "--depot-user" $config::depot_user]
 	set args(force_download) 0
-	set args(target_version) [clock format [clock seconds] -format %Y-%m-%d]
-	if {[llength $argv] == 1} {
-		set args(target_version) [lindex $argv 0]
-		set argv [lrange $argv 1 end]
-	}
+	set default_version      [clock format [clock seconds] -format %Y-%m-%d]
+	set args(target_version) [consume_positional_cmdline_arg $default_version]
 }
 
 if {$perform(add-depot-user)} {
@@ -309,10 +299,7 @@ if {$perform(add-depot-user)} {
 	if {[llength $argv] == 0} {
 		exit_with_error "missing user-name argument\n$hint" }
 
-	if {[llength $argv] > 0} {
-		set args(new_depot_user) [lindex $argv 0]
-		set argv [lrange $argv 1 end]
-	}
+	set args(new_depot_user) [consume_positional_cmdline_arg ""]
 
 	if {$args(depot_url) == ""} {
 		exit_with_error "missing argument '--depot-url <url>'\n$hint" }
