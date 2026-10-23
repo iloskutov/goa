@@ -21,7 +21,7 @@ namespace eval goa {
 
 
 	proc validate_init_config { binary_name config { max_depth 5 }} {
-		global config::hsd_dir
+		global config::hsd_dir config::run_dir
 
 		if {$max_depth == 0} {
 			exit_with_error "maximum config depth exceeded during validation" }
@@ -49,8 +49,8 @@ namespace eval goa {
 				try {
 					# query for route to config file and validate
 					set config_file [query attribute $start_node \
-						"start_node | + route | + service ROM | label: config | + parent | : label"]
-					validate_init_config $sub_binary_name $config_file $max_depth
+						"start | + route | + service ROM | label: config | + parent | : label"]
+					validate_init_config $sub_binary_name [file safe-join $run_dir $config_file] $max_depth
 
 				} trap ATTRIBUTE_MISSING { } {
 					# validate inline config if present
