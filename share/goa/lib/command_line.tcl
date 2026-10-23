@@ -241,7 +241,7 @@ action_dependency build-dir       depot-dir
 action_dependency add-depot-user  depot-dir
 action_dependency published       exported
 
-if {[file exists import] && [file isfile import]} {
+if {[file exists import] && [file type import] == "file"} {
 	action_dependency build-dir import }
 
 #

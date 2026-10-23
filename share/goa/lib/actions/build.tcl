@@ -530,7 +530,7 @@ namespace eval goa {
 				foreach file $files {
 					if {![file exists $file]} {
 						append missing_files "\n $file" }
-					if {[file isdirectory $file]} {
+					if {[file type $file] == "directory"} {
 						append invalid_files "\n $file" }
 				}
 
@@ -761,7 +761,7 @@ namespace eval goa {
 			foreach file $files {
 				if {![file exists $file]} {
 					exit_with_error "api artifact does not exist: $file" }
-				if {[file isdirectory $file]} {
+				if {[file type $file] == "directory"} {
 					exit_with_error "api artifact is not a file: $file" }
 
 				regsub "$build_dir/" $file "" link_src

@@ -70,7 +70,7 @@ namespace eval goa {
 	
 		set pkg_dir [file join $project_dir pkg]
 	
-		if {![file exists $pkg_dir]} {
+		if {![file exists $pkg_dir] && [file type $pkg_dir] != "directory"} {
 			exit_with_error "no runtime defined at $pkg_dir" }
 	
 		# install depot content needed according to the pkg's archives definition
@@ -90,15 +90,21 @@ namespace eval goa {
 		#
 		set runtime_file [file join $pkg_dir runtime]
 	
-		if {![file exists $runtime_file]} {
+		if {![file exists $runtime_file] || [file type $runtime_file] != "file"} {
 			exit_with_error "missing runtime configuration at: $runtime_file" }
 	
 		# check runtime file against hsd
 		hid check $runtime_file "pkg_runtime"
 
 		# check syntax config files at raw/ against
-		foreach config_file [glob -nocomplain [file join raw *.config]] {
-			hid check $config_file "" }
+		set raw_dir [file join $project_dir raw]
+		if {[file exists $raw_dir] && [file type $raw_dir] != "directory"} {
+			exit_with_error "$raw_dir is not a directory" }
+
+		foreach config_file [glob -nocomplain [file join $raw_dir *.config]] {
+			set config_file [file fullnormalize $config_file]
+			hid check $config_file ""
+		}
 		
 		#
 		# Partially prepare depot before calling 'generate_runtime_config'.

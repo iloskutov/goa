@@ -52,8 +52,8 @@ namespace eval goa {
 		set dir_a [file join $contrib_dir $subdir]
 		set dir_b [file join $subdir]
 
-		if {![file exists $dir_a] || ![file isdirectory $dir_a]} { return 0 }
-		if {![file exists $dir_b] || ![file isdirectory $dir_b]} { return 0 }
+		if {![file exists $dir_a] || [file type $dir_a] != "directory"} { return 0 }
+		if {![file exists $dir_b] || [file type $dir_b] != "directory"} { return 0 }
 
 		return [catch {
 			exec -ignorestderr diff -u -r --exclude=.git --exclude=*~ $dir_a $dir_b
@@ -70,8 +70,8 @@ namespace eval goa {
 		set dir_a [file join $contrib_dir $subdir]
 		set dir_b [file join $subdir]
 
-		if {![file exists $dir_a] || ![file isdirectory $dir_a]} { return }
-		if {![file exists $dir_b] || ![file isdirectory $dir_b]} { return }
+		if {![file exists $dir_a] || [file type $dir_a] != "directory"} { return }
+		if {![file exists $dir_b] || [file type $dir_b] != "directory"} { return }
 
 		catch {
 			#
@@ -89,7 +89,7 @@ namespace eval goa {
 	proc import-metadata { } {
 		global project_name
 
-		if {![file exists import] || ![file isfile import]} {
+		if {![file exists import] || [file type import] != "file"} {
 			exit_with_error "missing 'import' file" }
 
 		puts [exec_import_tool metadata.mk PORT_NAME=$project_name]
@@ -105,7 +105,7 @@ namespace eval goa {
 		global config::build_dir config::import_dir
 		global config::contrib_cache_dir
 
-		if {![file exists import] || ![file isfile import]} {
+		if {![file exists import] || [file type import] != "file"} {
 			exit_with_error "missing 'import' file" }
 
 		# quick-check the import.hash to detect the need for re-import

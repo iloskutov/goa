@@ -457,11 +457,11 @@ namespace eval goa {
 
 		# automatically add the project's local raw and src archives
 		set raw_dir [file join $project_dir raw]
-		if {[file exists $raw_dir] && [file isdirectory $raw_dir]} {
+		if {[file exists $raw_dir] && [file type $raw_dir] == "directory"} {
 			lappend runtime_archives [versioned_project_archive raw] }
 
 		set src_dir [file join $project_dir src]
-		if {[file exists $src_dir] && [file isdirectory $src_dir]} {
+		if {[file exists $src_dir] && [file type $src_dir] == "directory"} {
 			lappend runtime_archives [versioned_project_archive src] }
 		
 		return $runtime_archives
@@ -607,7 +607,7 @@ namespace eval goa {
 
 		global config::api_dir project_dir
 
-		if {[file exists $api_dir] && [file isdirectory $api_dir]} {
+		if {[file exists $api_dir] && [file type $api_dir] == "directory"} {
 
 			set license_file [license_file]
 
@@ -669,7 +669,7 @@ namespace eval goa {
 		global project_dir
 
 		set raw_dir [file join $project_dir raw]
-		if {[file exists $raw_dir] && [file isdirectory $raw_dir]} {
+		if {[file exists $raw_dir] && [file type $raw_dir] == "directory"} {
 			if {$dst_dir == ""} {
 				set dst_dir [prepare_project_archive_directory raw] }
 			if {$dst_dir != ""} {
@@ -689,7 +689,7 @@ namespace eval goa {
 
 		# create src archive
 		set src_dir [file join $project_dir src]
-		if {[file exists $src_dir] && [file isdirectory $src_dir]} {
+		if {[file exists $src_dir] && [file type $src_dir] == "directory"} {
 
 			set files { }
 			lappend files "src"
@@ -740,16 +740,16 @@ namespace eval goa {
 		upvar  ${&exported_archives} exported_archives
 
 		set pkg_dir [file join $project_dir pkg]
-		if {![file exists $pkg_dir] || ![file isdirectory $pkg_dir]} {
+		if {![file exists $pkg_dir] || [file type $pkg_dir] != "directory"} {
 			return }
 
 		set readme_file [file join $pkg_dir README]
-		if {![file exists $readme_file]} {
+		if {![file exists $readme_file] || [file type $readme_file] != "file"} {
 			exit_with_error "missing README file at $readme_file" }
 
 		# check runtime file against hsd
 		set runtime_file [file join $pkg_dir runtime]
-		if {[file exists $runtime_file]} {
+		if {[file exists $runtime_file] && [file type $runtime_file] == "file"} {
 			hid check $runtime_file "pkg_runtime" }
 
 		set runtime_archives [versioned_runtime_archives]
@@ -789,7 +789,7 @@ namespace eval goa {
 		upvar  ${&exported_archives} exported_archives
 
 		# create bin archive
-		if {[file exists $bin_dir] && [file isdirectory $bin_dir]} {
+		if {[file exists $bin_dir] && [file type $bin_dir] == "directory"} {
 			set dst_dir [prepare_project_archive_directory bin]
 			if {$dst_dir != ""} {
 				set files [glob -nocomplain -directory $bin_dir *]
@@ -810,7 +810,7 @@ namespace eval goa {
 		global config::dbg_dir
 
 		# create dbg archive
-		if {[file exists $dbg_dir] && [file isdirectory $dbg_dir]} {
+		if {[file exists $dbg_dir] && [file type $dbg_dir] == "directory"} {
 			set dst_dir [prepare_project_archive_directory dbg]
 			if {$dst_dir != ""} {
 				set files [glob -nocomplain -directory $dbg_dir *]
@@ -897,7 +897,7 @@ namespace eval goa {
 		}
 
 		set index_file [file join $project_dir index]
-		if {[file exists $index_file] && [file isfile $index_file]} {
+		if {[file exists $index_file] && [file type $index_file] == "file"} {
 			hid check $index_file "index"
 	
 			# check index file for any missing archives
@@ -1060,25 +1060,25 @@ namespace eval goa {
 		set index_archive ""
 	
 		set raw_dir [file join $project_dir raw]
-		if {[file exists $raw_dir] && [file isdirectory $raw_dir]} {
+		if {[file exists $raw_dir] && [file type $raw_dir] == "directory"} {
 			lappend archives [versioned_project_archive raw] }
 	
 		set src_dir [file join $project_dir src]
-		if {[file exists $src_dir] && [file isdirectory $src_dir]} {
+		if {[file exists $src_dir] && [file type $src_dir] == "directory"} {
 			lappend archives [versioned_project_archive src] }
 	
-		if {[file exists $bin_dir] && [file isdirectory $bin_dir]} {
+		if {[file exists $bin_dir] && [file type $bin_dir] == "directory"} {
 			lappend archives [versioned_project_archive bin] }
 	
-		if {[file exists $api_dir] && [file isdirectory $api_dir]} {
+		if {[file exists $api_dir] && [file type $api_dir] == "directory"} {
 			lappend archives [versioned_project_archive api] }
 	
 		set pkg_dir [file join $project_dir pkg]
-		if {[file exists $pkg_dir] && [file isdirectory $pkg_dir]} {
+		if {[file exists $pkg_dir] && [file type $pkg_dir] == "directory"} {
 			lappend archives [apply_arch [versioned_project_archive pkg] $arch] }
 	
 		set index_file [file join $project_dir index]
-		if {[file exists $index_file] && [file isfile $index_file]} {
+		if {[file exists $index_file] && [file type $index_file] == "file"} {
 			set index_archive [versioned_project_archive index]
 	
 			foreach { path archs } [from-index [file join $depot_dir $index_archive] "pkg" "src"] {
@@ -1185,7 +1185,7 @@ namespace eval goa {
 		upvar ${&exported_archives} exported_archives
 		
 		set raw_dir [file join $project_dir raw]
-		if {[file exists $raw_dir] && [file isdirectory $raw_dir]} {
+		if {[file exists $raw_dir] && [file type $raw_dir] == "directory"} {
 			set other_archive [versioned_project_archive raw]
 			download_if_missing $other_archive
 
@@ -1210,7 +1210,7 @@ namespace eval goa {
 		upvar ${&exported_archives} exported_archives
 		
 		set src_dir [file join $project_dir src]
-		if {[file exists $src_dir] && [file isdirectory $src_dir]} {
+		if {[file exists $src_dir] && [file type $src_dir] == "directory"} {
 			set other_archive [versioned_project_archive src]
 			download_if_missing $other_archive
 			set other_dir [file safe-join $depot_dir $other_archive]
@@ -1270,7 +1270,7 @@ namespace eval goa {
 
 		upvar ${&exported_archives} exported_archives
  
-		if {[file exists $api_dir] && [file isdirectory $api_dir]} {
+		if {[file exists $api_dir] && [file type $api_dir] == "directory"} {
 			set other_archive [versioned_project_archive api]
 			download_if_missing $other_archive
 			set other_dir [file safe-join $depot_dir $other_archive]

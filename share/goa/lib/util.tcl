@@ -261,7 +261,11 @@ proc read_file_content_as_list { path } {
 proc has_src_but_no_artifacts { dir } {
 
 	# 'src/' exists but there is no 'artifacts' file
-	if {[file exists $dir/src] && ![file isfile $dir/artifacts]} {
+	if {[file exists $dir/src] && ![file exists $dir/artifacts]} {
+		return 1}
+
+	# 'artifacts' file exists but it is not a regular file
+	if {[file exists $dir/artifacts] && [file type $dir/artifacts] != "file"} {
 		return 1}
 
 	return 0
@@ -301,20 +305,28 @@ proc looks_like_goa_project_dir { dir } {
 		return 0 }
 
 	# no project if 'index' is anything other than a file
-	if {[file exists $dir/index] && ![file isfile $dir/index]} {
+	if {[file exists $dir/index] && [file type $dir/index] != "file"} {
 		return 0 }
 
 	# no project if 'import' is anything other than a file
-	if {[file exists $dir/import] && ![file isfile $dir/import]} {
+	if {[file exists $dir/import] && [file type $dir/import] != "file"} {
 		return 0 }
 
 	# no project if 'src/' or 'pkg/' or 'raw/' is anything other than a directory
 	foreach name [list src pkg raw] {
-		if {[file exists $dir/$name] && ![file isdirectory $dir/$name]} {
+		if {[file exists $dir/$name] && [file type $dir/$name] != "directory"} {
 			return 0 } }
 
 	# no project if there is neither a runtime nor an archives file in 'pkg/'
-	if {[file exists $dir/pkg] && ![file isfile $dir/pkg/runtime] && ![file isfile $dir/pkg/archives]} {
+	if {[file exists $dir/pkg] && ![file exists $dir/pkg/runtime] && ![file exists $dir/pkg/archives]} {
+		return 0 }
+
+	# runtime file is not a regular file
+	if {[file exists $dir/pkg/runtime] && [file type $dir/pkg/runtime] != "file"} {
+		return 0 }
+
+	# archives file is not a regular file
+	if {[file exists $dir/pkg/archives] && [file type $dir/pkg/archives] != "file"} {
 		return 0 }
 
 	# no project if raw/ is empty or has only *~ files or *.orig files
@@ -418,7 +430,7 @@ proc find_project_dir_for_archive { type name } {
 proc project_version_from_file { dir } {
 
 	set version_file [file safe-join $dir version]
-	if {[file exists $version_file]} {
+	if {[file exists $version_file] && [file type $version_file] == "file"} {
 		set version_from_file [string trim [read_file_content $version_file]]
 
 		if {[llength $version_from_file] > 1} {
@@ -680,7 +692,8 @@ proc runtime_files { archive_list } {
 			set pkg_archives_file [file safe-join $depot_dir $archive archives]
 			set pkg_runtime_file  [file safe-join $depot_dir $archive runtime]
 
-			if {[file exists $pkg_archives_file] && [file exists $pkg_runtime_file]} {
+			if {[file exists $pkg_archives_file] && [file exists $pkg_runtime_file] &&
+				[file type $pkg_archives_file] == "file" && [file type $pkg_runtime_file] == "file"} {
 
 				lappend runtime_file_list $pkg_runtime_file
 
@@ -788,7 +801,7 @@ proc api_archive_dir { api_name } {
 #
 proc symlink_directory_content { file_whitelist from_dir to_dir } {
 
-	if {![file exists $from_dir] || ![file isdirectory $from_dir]} {
+	if {![file exists $from_dir] || [file type $from_dir] != "directory"} {
 		return }
 
 	set from_files [glob -nocomplain -directory $from_dir *]
@@ -1000,30 +1013,32 @@ proc user_confirmation { msg default_yes } {
 # Execute $body for every archive type produced by the project in $dir
 proc for_each_archive_type { dir &type body } {
 	
-	upvar ${&type} type
+	set types ""
 	
 	set api_file [file join $dir api]
-	if {[file isfile $api_file]} {
-		set type "api"
-		uplevel 1 $body
-	}
+	if {[file exists $api_file] && [file type $api_file] == "file"} {
+		lappend types "api" }
 
 	set src_dir [file join $dir src]
+	if {[file exists $src_dir] && [file type $src_dir] == "directory"} {
+		lappend types "src" }
+
 	set import_file [file join $dir import]
-	if {[file isdirectory $src_dir] || [file isfile $import_file]} {
-		set type "src"
-		uplevel 1 $body
+	if {[file exists $import_file] && [file type $import_file] == "file"} {
+		if {[lindex $types end] != "src"} {
+			lappend types "src" }
 	}
 
 	set raw_dir [file join $dir raw]
-	if {[file exists $raw_dir] && [file isdirectory $raw_dir]} {
-		set type "raw"
-		uplevel 1 $body
-	}
+	if {[file exists $raw_dir] && [file type $raw_dir] == "directory"} {
+		lappend types "raw" }
 
 	set pkg_dir [file join $dir pkg]
-	if {[file exists $pkg_dir] && [file isdirectory $pkg_dir]} {
-		set type "pkg"
+	if {[file exists $pkg_dir] && [file type $pkg_dir] == "directory"} {
+		lappend types "pkg" }
+
+	upvar ${&type} type
+	foreach type $types {
 		uplevel 1 $body
 	}
 }

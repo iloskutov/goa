@@ -653,7 +653,7 @@ proc _instantiate_file_system { start_name name writeable &start_nodes &archives
 
 	# create folder in var_dir
 	set fs_dir [file safe-join $var_dir fs $name]
-	if {![file isdirectory $fs_dir]} {
+	if {![file exists $fs_dir]} {
 		log "creating file-system directory $fs_dir"
 		file mkdir $fs_dir
 	}
@@ -695,7 +695,7 @@ proc _instantiate_rom_provider { &start_nodes &archives &modules } {
 
 	# create folder in var_dir
 	set fs_dir [file safe-join $var_dir rom]
-	if {![file isdirectory $fs_dir]} {
+	if {![file exists $fs_dir]} {
 		log "creating file-system directory $fs_dir"
 		file mkdir $fs_dir
 	}

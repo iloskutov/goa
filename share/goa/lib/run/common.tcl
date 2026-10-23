@@ -68,7 +68,7 @@ proc _acquire_config { runtime_file runtime_archives } {
 
 		# check existence of $rom_name in raw/
 		set config_file [file join raw $rom_name]
-		if {![file exists $config_file]} {
+		if {![file exists $config_file] || [file type $config_file] != "file"} {
 			set binary_archives [binary_archives [apply_versions $runtime_archives]]
 			set config_file [_find_rom_in_archives $rom_name $binary_archives]
 
@@ -261,7 +261,8 @@ proc generate_runtime_config { runtime_file &runtime_archives &rom_modules } {
 			continue }
 
 		# raw content?
-		if {[file exists [file join raw $rom]]} {
+		set rom_in_raw [file join raw $rom]
+		if {[file exists $rom_in_raw] && [file type $rom_in_raw] == "file"} {
 			continue }
 
 		# artifact?

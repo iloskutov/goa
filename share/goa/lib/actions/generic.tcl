@@ -62,7 +62,7 @@ namespace eval goa {
 	proc _depot_exists { } {
 
 		global config::depot_dir
-		return [expr {[file exists $depot_dir] && [file isdirectory $depot_dir]}]
+		return [expr {[file exists $depot_dir] && [file type $depot_dir] == "directory"}]
 	}
 
 
@@ -72,7 +72,7 @@ namespace eval goa {
 	proc _make_writeable { path } {
 
 		file attributes $path -permissions "+w"
-		if {[file isdirectory $path]} {
+		if {[file type $path] == "directory"} {
 			foreach entry [glob [file join $path "*"]] {
 				_make_writeable $entry } }
 	}

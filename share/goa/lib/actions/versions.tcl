@@ -248,7 +248,7 @@ namespace eval goa {
 			set archives [concat $archives [read_file_content_as_list [file join pkg archives]]]
 
 			set index_file [file join $project_dir index]
-			if {[file exists $index_file] && [info exists depot_user]} {
+			if {[file exists $index_file] && [file type $index_file] == "file" && [info exists depot_user]} {
 				foreach { pkg_name pkg_archs } [from-index $index_file "pkg" "src" "api"] {
 					lappend archives $pkg_name }
 			}
