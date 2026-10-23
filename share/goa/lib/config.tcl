@@ -115,8 +115,11 @@ namespace eval ::config {
 	proc _is_sub_directory { value paths } {
 
 		foreach path $paths {
-			if {[regexp "^$path" $value]} {
-				return 1 }}
+			if {$path == $value} {
+				return 1 }
+			if {[string match "$path/*" $value]} {
+				return 1 }
+		}
 
 		return 0
 	}
@@ -280,7 +283,7 @@ namespace eval ::config {
 		set allowed_paths [list [file normalize $project_dir] [file normalize $original_dir]]
 		set allowed_paths [lsort -unique $allowed_paths]
 
-		set allowed_tools [list /usr/]
+		set allowed_tools [list /usr]
 		lappend allowed_tools $tool_dir
 
 		# safe slave interpreter for goarc files
