@@ -331,6 +331,10 @@ if {$perform(install-toolchain)} {
 if {$perform(build-dir)} {
 	if {[consume_optional_cmdline_switch "--rebuild"]} {
 		set config::rebuild 1 }
+
+	set genodelabs [consume_optional_cmdline_arg "--genodelabs-user" $genodelabs]
+	if {$genodelabs != "genodelabs"} {
+		diag "Using depot archives from user '$genodelabs' instead of 'genodelabs'" }
 }
 
 if {$perform(run-dir)} {
@@ -356,10 +360,6 @@ if {$perform(build)} {
 
 	set config::olevel     [consume_optional_cmdline_arg "--olevel"     $config::olevel]
 	set config::depot_user [consume_optional_cmdline_arg "--depot-user" $config::depot_user]
-
-	set genodelabs [consume_optional_cmdline_arg "--genodelabs-user" $genodelabs]
-	if {$genodelabs != "genodelabs"} {
-		diag "Using depot archives from user '$genodelabs' instead of 'genodelabs'" }
 }
 
 if {$perform(export)} {
