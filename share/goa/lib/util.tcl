@@ -861,6 +861,10 @@ proc mirror_source_dir_to_build_dir { } {
 			if {[file type $path] != "link"} {
 				continue }
 
+			# skip if symlink already points to target (to keep timestamp)
+			if {[file normalize [file link $path]] == $target} {
+				continue }
+
 			file delete $path
 		}
 
