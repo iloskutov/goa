@@ -165,7 +165,10 @@ namespace eval ::config {
 				if {[info exists var_dir]} {
 					lappend writeable_paths $var_dir }
 
-				_validate_path_arg $writeable_paths $argnum {*}$args
+				# only validate the directory not the target file because
+				# _validate_path_arg would resolve the symlink if it exists
+				set tmpargs [lreplace $args $argnum $argnum [file dirname [lindex $args $argnum]]]
+				_validate_path_arg $writeable_paths $argnum {*}$tmpargs
 
 				incr argnum
 				if {[llength $args] > $argnum} {
