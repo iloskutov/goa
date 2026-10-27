@@ -68,8 +68,8 @@ proc create_or_update_build_dir { } {
 	close $fd
 
 	# invoke configure script only once
-	if {[file exists [file join $build_dir config.status]]} {
-		return }
+	set find_result [string trim [exec find $build_dir -maxdepth 2 -name config.status]]
+	if {$find_result != ""} { return }
 
 	set orig_pwd [pwd]
 
