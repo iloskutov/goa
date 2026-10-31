@@ -115,7 +115,8 @@ namespace eval gaol {
 		dict set state network 1
 
 		dict lappend state robinds /etc/ssl /etc/ssl
-		dict lappend state robinds /etc/ca-certificates /etc/ca-certificates
+		if {[file exists /etc/ca-certificates]} {
+			dict lappend state robinds /etc/ca-certificates /etc/ca-certificates }
 		gaol --ro-bind /etc/resolv.conf {*}$args
 	}
 
